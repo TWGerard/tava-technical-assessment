@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "firstName": "Peter",
+    "lastName": "Gibbons",
+    "department": "Engineering",
+    "dateStarted": "1997-03-13T00:00:00.000Z",
+    "quote": "The thing is, Bob, it's not that I'm lazy, it's that I just don't care.",
+    "status": "active",
+    "avatarUrl": "https://thispersondoesnotexist.com/image"
+  },
+  {
+    "id": 2,
+    "firstName": "Samir",
+    "lastName": "Nagheenanajar",
+    "department": "Engineering",
+    "dateStarted": "1998-06-25T00:00:00.000Z",
+    "quote": "No one in this country can ever pronounce my name right.",
+    "status": "active",
+    "avatarUrl": "https://thispersondoesnotexist.com/image"
+  },
+  {
+    "id": 3,
+    "firstName": "Michael",
+    "lastName": "Bolton",
+    "department": "Engineering",
+    "dateStarted": "1998-10-01T00:00:00.000Z",
+    "quote": "That's the worst idea I've ever heard in my life, Tom.",
+    "status": "inactive",
+    "avatarUrl": "https://thispersondoesnotexist.com/image"
+  },
+  {
+    "id": 4,
+    "firstName": "Bill",
+    "lastName": "Lumbergh",
+    "department": "Management",
+    "dateStarted": "1996-08-15T00:00:00.000Z",
+    "quote": "Ummm, I'm gonna need you to go ahead come in tomorrow.",
+    "status": "active",
+    "avatarUrl": "https://thispersondoesnotexist.com/image"
+  },
+  {
+    "id": 5,
+    "firstName": "Bob",
+    "lastName": "Slydell",
+    "department": "Management",
+    "dateStarted": "1997-06-13T00:00:00.000Z",
+    "quote": "What would you say...you do here?",
+    "status": "active",
+    "avatarUrl": "https://thispersondoesnotexist.com/image"
+  }
+]
