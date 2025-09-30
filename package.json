@@ -6,20 +6,27 @@
     "node": "22.20.0",
     "npm": "10.9.3"
   },
-  "type": "module",
+  "main": "dist/src/main",
   "scripts": {
     "dev": "vite",
-    "server": "",
-    "build": "tsc -b && vite build",
+    "server": "nest start --watch",
+    "build": "tsc -b && vite build && nest build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/platform-express": "^11.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@nestjs/cli": "^11.0.10",
+    "@nestjs/schematics": "^11.0.7",
+    "@types/node": "^24.6.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
