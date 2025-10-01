@@ -1,7 +1,34 @@
-html, body {
+html,
+body {
   background-color: grey;
+}
+
+header {
+  display: flex;
+  align-items: center;
+}
+
+header>a {
+  margin-left: 8px;
+}
+
+.header-home-link {
+  margin-right: auto;
 }
 
 .logo {
   width: 100px;
+}
+
+.table-container {
+  display: table;
+  width: 100%;
+}
+
+.table-row {
+  display: table-row;
+}
+
+.table-cell {
+  display: table-cell;
 }
