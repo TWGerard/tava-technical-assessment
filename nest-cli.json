@@ -12,7 +12,12 @@
     "tsConfigPath": "./tsconfig.nest.json",
     "webpack": false,
     "deleteOutDir": true,
-    "assets": [],
+    "assets": [
+      {
+        "include": "prisma/**/*",
+        "outDir": "dist-nest/src-nest"
+      }
+    ],
     "watchAssets": false,
     "plugins": []
   }
