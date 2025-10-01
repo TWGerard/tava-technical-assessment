@@ -19,14 +19,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@apollo/client": "^4.0.7",
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/express5": "^1.1.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.2",
+    "@nestjs/apollo": "^13.2.0",
     "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.6",
+    "@nestjs/graphql": "^13.2.0",
     "@nestjs/platform-express": "^11.1.6",
     "@prisma/client": "^6.16.3",
+    "class-transformer": "^0.5.1",
+    "graphql": "^16.11.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "reflect-metadata": "^0.2.2"
@@ -44,6 +51,7 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
     "prisma": "^6.16.3",
+    "prisma-nestjs-graphql": "^21.2.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"

@@ -9,6 +9,13 @@ generator client {
   output   = "../src-nest/prisma"
 }
 
+generator nestgraphql {
+  provider           = "node node_modules/prisma-nestjs-graphql"
+  output             = "../src-nest/prismagraphql"
+  reExport           = Directories
+  prismaClientImport = "src-nest/prisma/client"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
