@@ -8,9 +8,13 @@
   },
   "main": "dist-nest/src-nest/main",
   "scripts": {
-    "dev": "vite",
-    "server": "nest start --watch",
-    "build": "tsc -b && vite build && nest build",
+    "dev": "npm run dev:react",
+    "server": "npm run dev:nest",
+    "dev:react": "vite",
+    "dev:nest": "npx prisma generate && nest start --watch",
+    "build": "npm run build:react && npm run build:nest",
+    "build:react": "tsc -b && vite build",
+    "build:nest": "npx prisma generate && nest build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
