@@ -119,8 +119,8 @@ const PersonList = ({
         {/* @ts-ignore */}
         {(data?.listPeople || []).map((person) => (
           <div className="table-row" key={person.id}>
-            {Object.values(rows).map(rowFn => (
-              <div className="table-cell">{rowFn(person)}</div>
+            {Object.entries(rows).map(([key, rowFn]) => (
+              <div key={key} className="table-cell">{rowFn(person)}</div>
             ))}
           </div>
         ))}
