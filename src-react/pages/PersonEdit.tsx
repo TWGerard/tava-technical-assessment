@@ -1,8 +1,9 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import PersonForm from "../components/PersonForm";
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import Page from "./Page";
+import { useCallback } from "react";
 
 const GET_PERSON = gql`
   query GetPerson($id: Int!) {
@@ -14,7 +15,9 @@ const GET_PERSON = gql`
       phone
       employee {
         id
-        departmentId
+        department {
+          name
+        }
         title
       }
       user {
@@ -25,28 +28,92 @@ const GET_PERSON = gql`
   }
 `;
 
+const UPDATE_PERSON = gql`
+  mutation UpdatePerson($id: Int!, $data: PersonUpdateInput!) {
+    updatePerson(where: { id: $id }, data: $data) {
+      id
+      employee {
+        id
+      }
+    }
+  }
+`;
+
+const updateQuery = (data: { [key: string]: any }, original: { [key: string]: any } | undefined = undefined) => {
+  const query: { [key: string]: any } = {};
+  Object.entries(data).forEach(([k, v]) => {
+    if (typeof v != "string" || v == "" || ["id", "__typename"].includes(k) || (original && original[k] == v)) return;
+    query[k] = original ? { set: v } : v;
+  });
+  return query;
+};
+
+
+
 const PersonEdit = () => {
   const { personId } = useParams();
+  const navigate = useNavigate();
   const { data, loading, error } = useQuery(GET_PERSON, {
     variables: { id: parseInt(personId || "") },
   });
-
-  if (loading) return (
-    <Page>Loading</Page>
-  );
-
-  if (error) return (
-    <Page>Error</Page>
-  );
+  const [updatePerson, { data: updateData, loading: updateLoading, error: updateError }] = useMutation(UPDATE_PERSON);
 
   // @ts-expect-error
   const person = data?.findUniquePerson;
 
+  const onSubmit = useCallback((data: any) => {
+    const query = updateQuery(data, person);
+
+    if (data.user) {
+      query.user = {
+        upsert: {
+          where: { personId: { equals: parseInt(person.id || "") } },
+          create: updateQuery(data.user),
+          update: updateQuery(data.user, person.user || {})
+        }
+      };
+    }
+
+    if (data.employee) {
+      query.employee = {
+        upsert: {
+          where: { personId: { equals: parseInt(person.id || "") } },
+          create: updateQuery(data.employee),
+          update: updateQuery(data.employee, person.employee || {})
+        }
+      };
+      if (data.employee.department?.name) {
+        const department = {
+          connectOrCreate: {
+            where: { name: data.employee.department.name },
+            create: updateQuery(data.employee.department || {})
+          }
+        }
+        query.employee.upsert.create.department = department;
+        query.employee.upsert.update.department = department;
+      }
+    }
+
+    updatePerson({ variables: { id: parseInt(person.id || ""), data: query } });
+  }, [person?.id]);
+
+
+  // @ts-ignore
+  if (updateData?.updatePerson?.id) navigate(updateData.updatePerson.employee ? "/employees/" : "/people/");
+
   return (
     <Page>
-      <h1>Editing {person.firstName} {person.lastName}</h1>
-      <PersonForm person={person} />
-      <a href="#">delete</a>
+      <h1>Editing {person?.firstName} {person?.lastName}</h1>
+      {loading ? (
+        <>Loading</>
+      ) : error ? (
+        <>Error</>
+      ) : (
+        <>
+          <PersonForm person={person} onSubmit={onSubmit} disabled={updateLoading} error={updateError} />
+          <a href="#" className={updateLoading ? "disabled" : ""}>delete</a>
+        </>
+      )}
     </Page>
   );
 };

@@ -1,8 +1,9 @@
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import { ReactNode } from "react";
+import { MouseEvent, ReactNode, useCallback } from "react";
 import { Link } from "react-router";
 import Page from "./Page";
+import { useDeletePerson } from "../hooks.ts/person";
 
 const LIST_PEOPLE = gql`
   query ListPeople {
@@ -31,7 +32,9 @@ const LIST_EMPLOYEES = gql`
       phone
       employee {
         id
-        departmentId
+        department {
+          name
+        }
         title
       }
       user {
@@ -72,12 +75,34 @@ const PersonListQuery = (type: PersonListType) => {
   }
 }
 
+const PersonDelete = ({
+  person,
+  onDelete,
+}: {
+  person: any,
+  onDelete?: () => void,
+}) => {
+  const [deletePerson, _] = useDeletePerson();
+  const onClickDelete = useCallback((ev: MouseEvent<HTMLAnchorElement>) => {
+    ev.preventDefault();
+    if (!confirm(`Are you sure you want to delete ${person.firstName} ${person.lastName}? This cannot be undone.`)) return;
+    deletePerson({ variables: { id: parseInt(person?.id || "") } })
+      .then(() => {
+        if (onDelete) onDelete();
+      });
+  }, []);
+
+  return (
+    <a href="#" data-name={`${person.firstName} ${person.lastName}`} data-id={person.id} onClick={onClickDelete}>delete</a>
+  );
+};
+
 const PersonList = ({
   type = "All People",
 }: {
   type?: PersonListType
 }) => {
-  const { data } = useQuery(PersonListQuery(type));
+  const { data, refetch } = useQuery(PersonListQuery(type));
 
   const rows: { [key: string]: (p: any) => ReactNode } = {
     "Name": p => `${p.firstName} ${p.lastName}`,
@@ -89,7 +114,7 @@ const PersonList = ({
   }
 
   if (type == "Employees") {
-    rows["Department"] = p => p.employee.departmentId;
+    rows["Department"] = p => p.employee.department?.name;
     rows["Title"] = p => p.employee.title;
   } else {
     rows["Is Employee"] = p => p.employee ? "yes" : "no";
@@ -104,7 +129,7 @@ const PersonList = ({
   rows[""] = p => (
     <>
       <Link to={`/people/${p.id}/`}>edit</Link>
-      <a href="#">delete</a>
+      <PersonDelete person={p} onDelete={refetch} />
     </>
   );
 
@@ -112,7 +137,7 @@ const PersonList = ({
     <Page>
       <h1>{type}</h1>
       <div className="table-container">
-        <div className="table-row">
+        <div className="table-row table-header">
           {Object.keys(rows).map(rowName => (
             <div className="table-cell" key={rowName}>{rowName}</div>
           ))}
