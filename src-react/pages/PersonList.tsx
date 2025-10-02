@@ -127,33 +127,6 @@ const PersonList = ({
       </div>
     </>
   );
-
-  return (
-    <>
-      <h1>{type}</h1>
-      <div className="table-container">
-        <div className="table-row">
-          <div className="table-cell">Name</div>
-          <div className="table-cell">Is Employee</div>
-          <div className="table-cell">Is User</div>
-          <div className="table-cell"></div>
-        </div>
-        {/* @ts-ignore */}
-        {(data?.listPeople || []).map((person) => (
-          <div className="table-row" key={person.id}>
-            <div className="table-cell">{person.firstName} {person.lastName}</div>
-            <div className="table-cell">{!!person.Employee ? "yes" : "no"}</div>
-            <div className="table-cell">{!!person.User ? "yes" : "no"}</div>
-            <div className="table-cell"></div>
-            <div className="table-cell">
-              <Link to={`/people/${person.id}/`}>edit</Link>
-              <a href="#">delete</a>
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
-  );
 };
 
 export default PersonList;
