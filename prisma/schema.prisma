@@ -23,7 +23,7 @@ datasource db {
 
 model Department {
   id        Int        @id @default(autoincrement())
-  name      String
+  name      String     @unique
   employees Employee[]
 }
 
