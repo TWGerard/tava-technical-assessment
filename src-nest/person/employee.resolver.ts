@@ -9,6 +9,8 @@ export class EmployeeResolver {
 
   @ResolveField('department', () => Department)
   department(@Parent() employee: Employee) {
+    if (!employee.departmentId) return null;
+
     return this.employeeService.prisma.department.findUnique({ where: { id: employee.departmentId } });
   }
 }
