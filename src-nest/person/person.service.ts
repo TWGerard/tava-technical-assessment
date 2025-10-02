@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "./prisma.service";
-import { BaseCrudService } from "./base.service";
+import { PrismaService } from "../prisma.service";
+import { BaseCrudService } from "../base.service";
 import {
   CreateManyPersonArgs,
   CreateOnePersonArgs,
@@ -14,7 +14,7 @@ import {
   Person,
   PersonAggregateArgs,
   PersonGroupByArgs,
-} from "./prismagraphql/person";
+} from "../prismagraphql/person";
 
 @Injectable()
 export class PersonService extends BaseCrudService<

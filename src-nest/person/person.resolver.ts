@@ -13,10 +13,12 @@ import {
   UpdateManyPersonArgs,
   DeleteOnePersonArgs,
   DeleteManyPersonArgs,
-} from "./prismagraphql/person";
-import { AffectedRows } from "./prismagraphql/prisma";
-import { Resolver, Query, Args, Mutation } from "@nestjs/graphql";
+} from "../prismagraphql/person";
+import { AffectedRows } from "../prismagraphql/prisma";
+import { Resolver, Query, Args, Mutation, ResolveField, Parent } from "@nestjs/graphql";
 import { PersonService } from "./person.service";
+import { Employee } from "src-nest/prismagraphql/employee";
+import { User } from "src-nest/prismagraphql/user";
 
 @Resolver(() => Person)
 export class PersonResolver {
@@ -75,5 +77,15 @@ export class PersonResolver {
   @Mutation(() => AffectedRows, { nullable: true })
   deleteManyPeople(@Args() args: DeleteManyPersonArgs) {
     return this.personService.deleteMany(args);
+  }
+
+  @ResolveField(() => Employee)
+  employee(@Parent() person: Person) {
+    return this.personService.prisma.employee.findUnique({ where: { personId: person.id } });
+  }
+
+  @ResolveField(() => User)
+  user(@Parent() person: Person) {
+    return this.personService.prisma.user.findUnique({ where: { personId: person.id } });
   }
 }
