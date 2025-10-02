@@ -10,8 +10,8 @@ const PersonForm = ({
   const [createEmployee, setCreateEmployee] = useState(false);
   const [createUser, setCreateUser] = useState(false);
 
-  const showEmployeeForm = createEmployee || !!person.Employee;
-  const showUserForm = createUser || !!person.User;
+  const showEmployeeForm = createEmployee || !!person.employee;
+  const showUserForm = createUser || !!person.user;
 
   const onSubmit = useCallback((data: any) => {
     console.log("Form Submitted", data);
@@ -25,7 +25,7 @@ const PersonForm = ({
         <input {...register("email")} placeholder="Email" />
         <input {...register("phone")} placeholder="Phone" maxLength={11} />
       </div>
-      {!person.Employee && (
+      {!person.employee && (
         <div>
           <label htmlFor="create-employee-checkbox">
             <input
@@ -41,11 +41,11 @@ const PersonForm = ({
       {showEmployeeForm && (
         <div>
           <h3>Employee Details</h3>
-          <input {...register("Employee.directoryId")} />
-          <input {...register("Employee.title")} placeholder="Title" />
+          <input {...register("employee.departmentId")} />
+          <input {...register("employee.title")} placeholder="Title" />
         </div>
       )}
-      {!person.User && (
+      {!person.user && (
         <div>
           <label htmlFor="create-user-checkbox">
             <input
@@ -61,10 +61,10 @@ const PersonForm = ({
       {showUserForm && (
         <div>
           <h3>User Details</h3>
-          <select {...register("User.userType")}>
-            <option value="user">User</option>
-            <option value="employee">Employee</option>
-            <option value="admin">Admin</option>
+          <select {...register("user.userType")}>
+            <option value="USER">User</option>
+            <option value="EMPLOYEE">Employee</option>
+            <option value="ADMIN">Admin</option>
           </select>
         </div>
       )}

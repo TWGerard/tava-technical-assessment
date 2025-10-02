@@ -2,6 +2,7 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { ReactNode } from "react";
 import { Link } from "react-router";
+import Page from "./Page";
 
 const LIST_PEOPLE = gql`
   query ListPeople {
@@ -11,10 +12,10 @@ const LIST_PEOPLE = gql`
       lastName
       email
       phone
-      Employee {
+      employee {
         id
       }
-      User {
+      user {
         id
       }
     } 
@@ -22,18 +23,18 @@ const LIST_PEOPLE = gql`
 `;
 const LIST_EMPLOYEES = gql`
   query ListPeople {
-    listPeople(where:{ Employee: { isNot: null }}) {
+    listPeople(where:{ employee: { isNot: null }}) {
       id
       firstName
       lastName
       email
       phone
-      Employee {
+      employee {
         id
         departmentId
         title
       }
-      User {
+      user {
         id
       }
     } 
@@ -41,16 +42,16 @@ const LIST_EMPLOYEES = gql`
 `;
 const LIST_USERS = gql`
   query ListPeople {
-    listPeople(where:{ User: { isNot: null }}) {
+    listPeople(where:{ user: { isNot: null }}) {
       id
       firstName
       lastName
       email
       phone
-      Employee {
+      employee {
         id
       }
-      User {
+      user {
         id
         userType
       }
@@ -88,16 +89,16 @@ const PersonList = ({
   }
 
   if (type == "Employees") {
-    rows["Department"] = p => p.Employee.departmentId;
-    rows["Title"] = p => p.Employee.title;
+    rows["Department"] = p => p.employee.departmentId;
+    rows["Title"] = p => p.employee.title;
   } else {
-    rows["Is Employee"] = p => p.Employee ? "yes" : "no";
+    rows["Is Employee"] = p => p.employee ? "yes" : "no";
   }
 
   if (type == "Users") {
-    rows["User Type"] = p => p.User.userType;
+    rows["User Type"] = p => p.user.userType;
   } else {
-    rows["Is User"] = p => p.User ? "yes" : "no";
+    rows["Is User"] = p => p.user ? "yes" : "no";
   }
 
   rows[""] = p => (
@@ -108,7 +109,7 @@ const PersonList = ({
   );
 
   return (
-    <>
+    <Page>
       <h1>{type}</h1>
       <div className="table-container">
         <div className="table-row">
@@ -125,7 +126,7 @@ const PersonList = ({
           </div>
         ))}
       </div>
-    </>
+    </Page>
   );
 };
 

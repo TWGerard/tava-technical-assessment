@@ -2,6 +2,7 @@ import { useParams } from "react-router";
 import PersonForm from "../components/PersonForm";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
+import Page from "./Page";
 
 const GET_PERSON = gql`
   query GetPerson($id: Int!) {
@@ -11,8 +12,14 @@ const GET_PERSON = gql`
       firstName
       email
       phone
-      Employee {
+      employee {
         id
+        departmentId
+        title
+      }
+      user {
+        id
+        userType
       }
     }
   }
@@ -25,22 +32,22 @@ const PersonEdit = () => {
   });
 
   if (loading) return (
-    <>Loading</>
+    <Page>Loading</Page>
   );
 
   if (error) return (
-    <>Error</>
+    <Page>Error</Page>
   );
 
   // @ts-expect-error
   const person = data?.findUniquePerson;
 
   return (
-    <>
+    <Page>
       <h1>Editing {person.firstName} {person.lastName}</h1>
       <PersonForm person={person} />
       <a href="#">delete</a>
-    </>
+    </Page>
   );
 };
 

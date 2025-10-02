@@ -1,5 +1,7 @@
+import Page from "./Page";
+
 const NotFound = () => {
-  return <>404</>;
+  return <Page>404</Page>;
 }
 
 export default NotFound;
