@@ -115,18 +115,20 @@ const PersonList = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const whereArgs = getPersonListFilters(type);
   if (searchParams.get('name')) {
-    whereArgs.AND = {
-      firstName: {
-        contains: searchParams.get('name'),
-        mode: "insensitive",
+    whereArgs.OR = [
+      {
+        firstName: {
+          contains: searchParams.get('name'),
+          mode: "insensitive",
+        },
       },
-      OR: {
+      {
         lastName: {
           contains: searchParams.get('name'),
           mode: "insensitive",
         }
       }
-    };
+    ];
   }
   if (searchParams.get('email')) {
     whereArgs.email = {
