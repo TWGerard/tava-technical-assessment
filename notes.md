@@ -11,3 +11,4 @@
 - Used official documentation to set up NestJS backend with Prisma ORM using Prisma Postgres
 - Used Gemini AI to help bootstrap initial endpoints with NestJS and Prisma
 - Typically we would have User authentication but I am not going to implement it at the moment
+- It would be nice to add a React table library but I'll just stick with something simple for now

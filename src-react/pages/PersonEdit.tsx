@@ -3,7 +3,8 @@ import PersonForm from "../components/PersonForm";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import Page from "./Page";
-import { useCallback } from "react";
+import { MouseEvent, useCallback } from "react";
+import { useConfirmAndDeletePerson } from "../hooks.ts/person";
 
 const GET_PERSON = gql`
   query GetPerson($id: Int!) {
@@ -57,9 +58,15 @@ const PersonEdit = () => {
     variables: { id: parseInt(personId || "") },
   });
   const [updatePerson, { data: updateData, loading: updateLoading, error: updateError }] = useMutation(UPDATE_PERSON);
+  const confirmAndDeletePerson = useConfirmAndDeletePerson();
 
   // @ts-expect-error
   const person = data?.findUniquePerson;
+
+  const onClickDelete = useCallback((ev: MouseEvent<HTMLButtonElement>) => {
+    ev.preventDefault();
+    confirmAndDeletePerson(person).then(() => navigate("/people/"));
+  }, [person?.id, person?.firstName, person?.lastName]);
 
   const onSubmit = useCallback((data: any) => {
     const query = updateQuery(data, person);
@@ -111,7 +118,7 @@ const PersonEdit = () => {
       ) : (
         <>
           <PersonForm person={person} onSubmit={onSubmit} disabled={updateLoading} error={updateError} />
-          <a href="#" className={updateLoading ? "disabled" : ""}>delete</a>
+          <button onClick={onClickDelete} className={updateLoading ? "disabled" : ""}>Delete</button>
         </>
       )}
     </Page>
