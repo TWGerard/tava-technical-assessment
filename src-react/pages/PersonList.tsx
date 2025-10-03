@@ -7,8 +7,8 @@ import { useConfirmAndDeletePerson } from "../hooks.ts/person";
 import useDebounce from "../hooks.ts/useDebounce";
 
 const LIST_PEOPLE = gql`
-  query ListPeople {
-    listPeople {
+  query ListPeople($whereArgs: PersonWhereInput, $orderByArgs: [PersonOrderByWithRelationInput!]) {
+    listPeople(where: $whereArgs, orderBy: $orderByArgs) {
       id
       firstName
       lastName
@@ -24,8 +24,8 @@ const LIST_PEOPLE = gql`
   }
 `;
 const LIST_EMPLOYEES = gql`
-  query ListEmployees {
-    listPeople(where:{ employee: { isNot: null }}) {
+  query ListEmployees($whereArgs: PersonWhereInput, $orderByArgs: [PersonOrderByWithRelationInput!]) {
+    listPeople(where: $whereArgs, orderBy: $orderByArgs) {
       id
       firstName
       lastName
@@ -45,8 +45,8 @@ const LIST_EMPLOYEES = gql`
   }
 `;
 const LIST_USERS = gql`
-  query ListUsers {
-    listPeople(where:{ user: { isNot: null }}) {
+  query ListUsers($whereArgs: PersonWhereInput, $orderByArgs: [PersonOrderByWithRelationInput!]) {
+    listPeople(where: $whereArgs, orderBy: $orderByArgs) {
       id
       firstName
       lastName
@@ -65,7 +65,7 @@ const LIST_USERS = gql`
 
 type PersonListType = "All People" | "Employees" | "Users";
 
-const PersonListQuery = (type: PersonListType) => {
+const getPersonListQuery = (type: PersonListType) => {
   switch (type) {
     case "Employees":
       return LIST_EMPLOYEES;
@@ -75,6 +75,19 @@ const PersonListQuery = (type: PersonListType) => {
       return LIST_PEOPLE;
   }
 }
+
+const getPersonListFilters = (type: PersonListType): any => {
+  switch (type) {
+    case "Employees":
+      return { employee: { isNot: null } };
+    case "Users":
+      return { user: { isNot: null } };
+    default:
+      return {};
+  }
+};
+
+const defaultOrderBy = "name";
 
 const PersonDelete = ({
   person,
@@ -99,8 +112,51 @@ const PersonList = ({
 }: {
   type?: PersonListType
 }) => {
-  const { data, refetch } = useQuery(PersonListQuery(type));
   const [searchParams, setSearchParams] = useSearchParams();
+  const whereArgs = getPersonListFilters(type);
+  if (searchParams.get('name')) {
+    whereArgs.AND = {
+      firstName: {
+        contains: searchParams.get('name'),
+        mode: "insensitive",
+      },
+      OR: {
+        lastName: {
+          contains: searchParams.get('name'),
+          mode: "insensitive",
+        }
+      }
+    };
+  }
+  if (searchParams.get('email')) {
+    whereArgs.email = {
+      contains: searchParams.get('email'),
+      mode: "insensitive",
+    };
+  }
+  const orderByArgs: any[] = [];
+  switch (searchParams.get('groupBy')) {
+    case "department":
+      orderByArgs.push({ employee: { department: { name: "asc" } } });
+      break;
+    case "userType":
+      orderByArgs.push({ user: { userType: "asc" } });
+      break;
+  }
+  const sortOrder = searchParams.get('sortOrder') || "asc";
+  const orderBy = searchParams.get('orderBy') || defaultOrderBy;
+  switch (searchParams.get('orderBy') || defaultOrderBy) {
+    case "email":
+      orderByArgs.push({ email: { sort: sortOrder, nulls: "last" } });
+      break;
+    case "title":
+      orderByArgs.push({ employee: { title: sortOrder } });
+      break;
+  }
+  // Always add name sorting last
+  orderByArgs.push({ firstName: sortOrder });
+  orderByArgs.push({ lastName: sortOrder });
+  const { data, refetch } = useQuery(getPersonListQuery(type), { variables: { whereArgs, orderByArgs } });
 
   const [nameFilter, setNameFilter] = useState(searchParams.get("name") || "");
   useEffect(() => {
@@ -117,6 +173,8 @@ const PersonList = ({
     "Email": p => p.email,
   };
 
+  const groupByOptions: { [key: string]: string } = {};
+
   if (type == "All People") {
     rows["Phone"] = p => p.phone;
   }
@@ -124,12 +182,14 @@ const PersonList = ({
   if (type == "Employees") {
     rows["Department"] = p => p.employee.department?.name;
     rows["Title"] = p => p.employee.title;
+    groupByOptions["department"] = "Department";
   } else {
     rows["Is Employee"] = p => p.employee ? "yes" : "no";
   }
 
   if (type == "Users") {
     rows["User Type"] = p => p.user.userType;
+    groupByOptions["userType"] = "User Type";
   } else {
     rows["Is User"] = p => p.user ? "yes" : "no";
   }
@@ -147,6 +207,13 @@ const PersonList = ({
     }
   }, [searchParams, type]);
 
+  const onClickClearFilters = useCallback((ev: MouseEvent<HTMLButtonElement>) => {
+    ev.preventDefault();
+    setNameFilter("");
+    setEmailFilter("");
+    setSearchParams({});
+  }, []);
+
   const debouncedChangeNameFilter = useDebounce((value: string) => changeFilter('name', value), 1000, [changeFilter]);
   const onChangeNameFilter = useCallback((ev: ChangeEvent<HTMLInputElement>) => {
     setNameFilter(ev.currentTarget.value);
@@ -163,25 +230,51 @@ const PersonList = ({
     changeFilter('groupBy', ev.currentTarget.value);
   }, [changeFilter]);
 
+  const onClickHeader = useCallback((ev: MouseEvent<HTMLAnchorElement>) => {
+    ev.preventDefault();
+    const targetOrderBy = ev.currentTarget.dataset.field || defaultOrderBy;
+    const currentOrderBy = searchParams.get("orderBy") || defaultOrderBy;
+    const currentSortOrder = searchParams.get("sortOrder") || "asc";
+    const targetSortOrder = targetOrderBy == currentOrderBy && currentSortOrder == "asc" ? "desc" : "asc";
+
+    setSearchParams({ ...Object.fromEntries(searchParams), orderBy: targetOrderBy, sortOrder: targetSortOrder });
+  }, [changeFilter, searchParams]);
+
+
   return (
     <Page>
       <h1>{type}</h1>
       <div className="table-filters">
         <input type="text" value={nameFilter} placeholder="Filter by Name" onChange={onChangeNameFilter} />
         <input type="text" value={emailFilter} placeholder="Filter by Email" onChange={onChangeEmailFilter} />
-        <label htmlFor="group-by-select">
-          Group By:
-          <select id="group-by-select" value={searchParams.get("groupBy") || ""} onChange={onChangeGroupBy}>
-            <option value="">None</option>
-            <option value="department">Department</option>
-            <option value="userType">User Type</option>
-          </select>
-        </label>
+        {Object.keys(groupByOptions).length > 0 && (
+          <label htmlFor="group-by-select">
+            Group By:
+            <select id="group-by-select" value={searchParams.get("groupBy") || ""} onChange={onChangeGroupBy}>
+              <option value="">None</option>
+              {Object.entries(groupByOptions).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </label>
+        )}
+        <button onClick={onClickClearFilters}>Clear Filters</button>
       </div>
       <div className="table-container">
         <div className="table-row table-header">
           {Object.keys(rows).map(rowName => (
-            <div className="table-cell" key={rowName}>{rowName}</div>
+            <div className="table-cell" key={rowName}>
+              {["Name", "Email", "Title"].includes(rowName) ? (
+                <a href="#" data-field={rowName.toLowerCase()} onClick={onClickHeader}>
+                  {rowName}
+                </a>
+              ) : rowName}
+              {orderBy == rowName.toLowerCase() && (sortOrder == "asc" ? (
+                <>&nbsp;&darr;</>
+              ) : (
+                <>&nbsp;&uarr;</>
+              ))}
+            </div>
           ))}
         </div>
         {/* @ts-ignore */}
