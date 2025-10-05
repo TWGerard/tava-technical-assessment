@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useListDepartments } from "../hooks.ts/department";
 
@@ -27,11 +27,14 @@ const PersonForm = ({
   if (!showEmployeeForm && getValues("employee")) setValue("employee", undefined);
   if (!showUserForm && getValues("user")) setValue("user", undefined);
 
+  // TODO: Show inline errors instead of using a popup
+  useEffect(() => {
+    if (!error) return;
+    alert(error.message);
+  }, [error])
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      {!!error && (
-        <pre>{JSON.stringify(error, null, 2)}</pre>
-      )}
       <div>
         <input {...register("firstName")} required placeholder="First Name" />
         <input {...register("lastName")} required placeholder="Last Name" />
