@@ -5,6 +5,7 @@ import { Link, useSearchParams } from "react-router";
 import Page from "./Page";
 import { useConfirmAndDeletePerson } from "../hooks.ts/person";
 import useDebounce from "../hooks.ts/useDebounce";
+import Button from "@mui/material/Button";
 
 const LIST_PEOPLE = gql`
   query ListPeople($whereArgs: PersonWhereInput, $orderByArgs: [PersonOrderByWithRelationInput!]) {
@@ -103,7 +104,16 @@ const PersonDelete = ({
   }, [person.id, person.firstName, person.lastName]);
 
   return (
-    <button data-name={`${person.firstName} ${person.lastName}`} data-id={person.id} onClick={onClickDelete}>Delete</button>
+    <Button
+      data-name={`${person.firstName} ${person.lastName}`}
+      data-id={person.id}
+      onClick={onClickDelete}
+      variant="contained"
+      color="error"
+      size="small"
+    >
+      Delete
+    </Button>
   );
 };
 

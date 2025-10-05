@@ -5,6 +5,7 @@ import { gql } from "@apollo/client";
 import Page from "./Page";
 import { MouseEvent, useCallback } from "react";
 import { useConfirmAndDeletePerson } from "../hooks.ts/person";
+import Button from "@mui/material/Button";
 
 const GET_PERSON = gql`
   query GetPerson($id: Int!) {
@@ -66,8 +67,8 @@ const PersonEdit = () => {
 
   const onClickDelete = useCallback((ev: MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
-    confirmAndDeletePerson(person).then(() => {
-      navigate("/people/");
+    confirmAndDeletePerson(person).then((result) => {
+      if (result) navigate("/people/");
     });
   }, [person?.id, person?.firstName, person?.lastName]);
 
@@ -124,8 +125,20 @@ const PersonEdit = () => {
         <>Error</>
       ) : (
         <>
-          <PersonForm person={person} onSubmit={onSubmit} disabled={updateLoading} error={updateError} />
-          <button onClick={onClickDelete} className={updateLoading ? "disabled" : ""}>Delete</button>
+          <PersonForm
+            person={person}
+            onSubmit={onSubmit}
+            disabled={updateLoading}
+            error={updateError}
+            extraButtons={
+              <Button
+                onClick={onClickDelete}
+                className={updateLoading ? "disabled" : ""}
+                variant="contained"
+                color="error"
+              >Delete</Button>
+            }
+          />
         </>
       )}
     </Page>
