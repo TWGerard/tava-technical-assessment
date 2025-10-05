@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 import PersonForm from "../components/PersonForm";
 import Page from "./Page";
 import { useCallback } from "react";
-import { useMutation } from "@apollo/client/react";
+import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router";
 import { removeEmptyStrings } from "../utils.ts/string";
 
@@ -20,6 +20,7 @@ const CREATE_PERSON = gql`
 
 
 const PersonCreate = () => {
+  const client = useApolloClient();
   const [createPerson, { data, loading, error }] = useMutation(CREATE_PERSON);
   const navigate = useNavigate();
 
@@ -42,7 +43,11 @@ const PersonCreate = () => {
       data.employee = { create: data.employee };
     }
 
-    createPerson({ variables: { data } });
+    createPerson({ variables: { data } }).then(() => {
+      client.cache.evict({
+        fieldName: 'listPeople'
+      });
+    });
   }, []);
 
   // @ts-ignore

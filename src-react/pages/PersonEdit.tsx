@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router";
 import PersonForm from "../components/PersonForm";
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import Page from "./Page";
 import { MouseEvent, useCallback } from "react";
@@ -52,6 +52,7 @@ const updateQuery = (data: { [key: string]: any }, original: { [key: string]: an
 
 
 const PersonEdit = () => {
+  const client = useApolloClient();
   const { personId } = useParams();
   const navigate = useNavigate();
   const { data, loading, error } = useQuery(GET_PERSON, {
@@ -65,7 +66,9 @@ const PersonEdit = () => {
 
   const onClickDelete = useCallback((ev: MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
-    confirmAndDeletePerson(person).then(() => navigate("/people/"));
+    confirmAndDeletePerson(person).then(() => {
+      navigate("/people/");
+    });
   }, [person?.id, person?.firstName, person?.lastName]);
 
   const onSubmit = useCallback((data: any) => {
@@ -101,7 +104,11 @@ const PersonEdit = () => {
       }
     }
 
-    updatePerson({ variables: { id: parseInt(person.id || ""), data: query } });
+    updatePerson({ variables: { id: parseInt(person.id || ""), data: query } }).then(() => {
+      client.cache.evict({
+        fieldName: 'listPeople'
+      });
+    });
   }, [person?.id]);
 
 
