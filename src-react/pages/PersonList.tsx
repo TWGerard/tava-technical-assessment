@@ -6,6 +6,17 @@ import Page from "./Page";
 import { useConfirmAndDeletePerson } from "../hooks.ts/person";
 import useDebounce from "../hooks.ts/useDebounce";
 import Button from "@mui/material/Button";
+import CheckIcon from "@mui/icons-material/CheckCircleOutline";
+import RemoveIcon from "@mui/icons-material/RadioButtonUnchecked";
+import ArrowDownIcon from "@mui/icons-material/ArrowDownward";
+import ArrowUpIcon from "@mui/icons-material/ArrowUpward";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
 
 const LIST_PEOPLE = gql`
   query ListPeople($whereArgs: PersonWhereInput, $orderByArgs: [PersonOrderByWithRelationInput!]) {
@@ -196,14 +207,14 @@ const PersonList = ({
     rows["Title"] = p => p.employee.title;
     groupByOptions["department"] = "Department";
   } else {
-    rows["Is Employee"] = p => p.employee ? "yes" : "no";
+    rows["Is Employee"] = p => p.employee ? <CheckIcon /> : <RemoveIcon />;
   }
 
   if (type == "Users") {
     rows["User Type"] = p => p.user.userType;
     groupByOptions["userType"] = "User Type";
   } else {
-    rows["Is User"] = p => p.user ? "yes" : "no";
+    rows["Is User"] = p => p.user ? <CheckIcon /> : <RemoveIcon />;
   }
 
   rows[""] = p => (
@@ -238,8 +249,8 @@ const PersonList = ({
     debouncedChangeEmailFilter(ev.currentTarget.value);
   }, [debouncedChangeEmailFilter]);
 
-  const onChangeGroupBy = useCallback((ev: ChangeEvent<HTMLSelectElement>) => {
-    changeFilter('groupBy', ev.currentTarget.value);
+  const onChangeGroupBy = useCallback((ev: SelectChangeEvent) => {
+    changeFilter('groupBy', ev.target.value);
   }, [changeFilter]);
 
   const onClickHeader = useCallback((ev: MouseEvent<HTMLAnchorElement>) => {
@@ -256,22 +267,24 @@ const PersonList = ({
   return (
     <Page>
       <h1>{type}</h1>
-      <div className="table-filters">
-        <input type="text" value={nameFilter} placeholder="Filter by Name" onChange={onChangeNameFilter} />
-        <input type="text" value={emailFilter} placeholder="Filter by Email" onChange={onChangeEmailFilter} />
-        {Object.keys(groupByOptions).length > 0 && (
-          <label htmlFor="group-by-select">
-            Group By:
-            <select id="group-by-select" value={searchParams.get("groupBy") || ""} onChange={onChangeGroupBy}>
-              <option value="">None</option>
-              {Object.entries(groupByOptions).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-          </label>
-        )}
-        <button onClick={onClickClearFilters}>Clear Filters</button>
-      </div>
+      <Box className="table-filters">
+        <Stack spacing={2} direction="row">
+          <TextField value={nameFilter} label="Filter by Name" onChange={onChangeNameFilter} size="small" />
+          <TextField value={emailFilter} label="Filter by Email" onChange={onChangeEmailFilter} size="small" />
+          {Object.keys(groupByOptions).length > 0 && (
+            <FormControl style={{ minWidth: "120px" }}>
+              <InputLabel id="group-by-select">Group By</InputLabel>
+              <Select labelId="group-by-select" label="Group By" value={searchParams.get("groupBy") || ""} onChange={onChangeGroupBy} size="small" autoWidth>
+                <MenuItem value="">None</MenuItem>
+                {Object.entries(groupByOptions).map(([value, label]) => (
+                  <MenuItem key={value} value={value}>{label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          <Button onClick={onClickClearFilters} variant="contained" size="small" disabled={searchParams.size == 0}>Clear Filters</Button>
+        </Stack>
+      </Box>
       <div className="table-container">
         <div className="table-row table-header">
           {Object.keys(rows).map(rowName => (
@@ -282,9 +295,9 @@ const PersonList = ({
                 </a>
               ) : rowName}
               {orderBy == rowName.toLowerCase() && (sortOrder == "asc" ? (
-                <>&nbsp;&darr;</>
+                <ArrowDownIcon />
               ) : (
-                <>&nbsp;&uarr;</>
+                <ArrowUpIcon />
               ))}
             </div>
           ))}
