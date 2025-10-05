@@ -39,7 +39,7 @@ const PersonForm = ({
         <input {...register("firstName")} required placeholder="First Name" />
         <input {...register("lastName")} required placeholder="Last Name" />
         <input {...register("email")} type="email" placeholder="Email" />
-        <input {...register("phone")} placeholder="Phone" maxLength={11} />
+        <input {...register("phone")} placeholder="Phone" minLength={11} maxLength={11} />
       </div>
       {!person.employee && (
         <div>
