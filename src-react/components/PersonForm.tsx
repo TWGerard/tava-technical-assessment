@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import Box from '@mui/material/Box';
 import { useListDepartments } from "../hooks.ts/department";
+import FormControl from '@mui/material/FormControl';
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 
 const PersonForm = ({
   person,
@@ -35,27 +43,22 @@ const PersonForm = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <input {...register("firstName")} required placeholder="First Name" />
-        <input {...register("lastName")} required placeholder="Last Name" />
-        <input {...register("email")} type="email" placeholder="Email" />
-        <input {...register("phone")} placeholder="Phone" minLength={11} maxLength={11} />
-      </div>
+      <Box>
+        <TextField {...register("firstName")} required label="First Name" />
+        <TextField {...register("lastName")} required label="Last Name" />
+        <TextField {...register("email")} type="email" label="Email" />
+        <TextField {...register("phone")} label="Phone" inputProps={{ minLength: 11, maxLength: 11 }} />
+      </Box>
       {!person.employee && (
         <div>
-          <label htmlFor="create-employee-checkbox">
-            <input
-              id="create-employee-checkbox"
-              type="checkbox"
-              checked={createEmployee}
-              onChange={(ev) => setCreateEmployee(ev.target.checked)}
-            />
-            <span>Create Employee</span>
-          </label>
+          <FormControlLabel
+            control={<Checkbox checked={createEmployee} onChange={(ev) => setCreateEmployee(ev.target.checked)} />}
+            label="Create Employee"
+          />
         </div>
       )}
       {showEmployeeForm && (
-        <div>
+        <Box>
           <h3>Employee Details</h3>
           <input
             {...register("employee.department.name")}
@@ -68,31 +71,29 @@ const PersonForm = ({
               <option key={department.id} value={department.name}>{department.employeeCount} Employee{department.employeeCount == 1 ? "" : "s"}</option>
             ))}
           </datalist>
-          <input {...register("employee.title")} required placeholder="Title" />
-        </div>
+          <TextField {...register("employee.title")} required label="Title" />
+        </Box>
       )}
       {!person.user && (
         <div>
-          <label htmlFor="create-user-checkbox">
-            <input
-              id="create-user-checkbox"
-              type="checkbox"
-              checked={createUser}
-              onChange={(ev) => setCreateUser(ev.target.checked)}
-            />
-            <span>Create User</span>
-          </label>
+          <FormControlLabel
+            control={<Checkbox checked={createUser} onChange={(ev) => setCreateUser(ev.target.checked)} />}
+            label="Create Employee"
+          />
         </div>
       )}
       {showUserForm && (
-        <div>
+        <Box>
           <h3>User Details</h3>
-          <select {...register("user.userType")} required>
-            <option value="USER">User</option>
-            <option value="STAFF">Staff</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
+          <FormControl fullWidth>
+            <InputLabel id="user-type">User Type</InputLabel>
+            <Select {...register("user.userType")} required>
+              <MenuItem value="USER">User</MenuItem>
+              <MenuItem value="STAFF">Staff</MenuItem>
+              <MenuItem value="ADMIN">Admin</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
       )}
 
       <input type="submit" value={person.id ? "Save" : "Create"} />
