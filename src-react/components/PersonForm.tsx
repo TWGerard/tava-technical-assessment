@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useListDepartments } from "../hooks.ts/department";
 
 const PersonForm = ({
   person,
@@ -12,11 +13,13 @@ const PersonForm = ({
   disabled?: boolean,
   error?: any,
 }) => {
+  const { data: departmentsData } = useListDepartments();
   const { register, handleSubmit, setValue, getValues } = useForm({ defaultValues: person, disabled: disabled });
   const [createEmployee, setCreateEmployee] = useState(false);
   const [createUser, setCreateUser] = useState(false);
 
-  const departments = ["Engineering"];
+  // @ts-ignore
+  const departments: any[] = departmentsData?.listDepartments || [];
 
   const showEmployeeForm = createEmployee || !!person.employee;
   const showUserForm = createUser || !!person.user;
@@ -59,7 +62,7 @@ const PersonForm = ({
           />
           <datalist id="department-suggestions">
             {departments.map((department) => (
-              <option key={department} value={department} />
+              <option key={department.id} value={department.name}>{department.employeeCount} Employee{department.employeeCount == 1 ? "" : "s"}</option>
             ))}
           </datalist>
           <input {...register("employee.title")} required placeholder="Title" />
