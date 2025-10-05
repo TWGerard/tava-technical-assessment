@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { ChangeEvent, MouseEvent, ReactNode, useCallback, useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import Page from "./Page";
 import { useConfirmAndDeletePerson } from "../hooks.ts/person";
 import useDebounce from "../hooks.ts/useDebounce";
@@ -17,6 +17,12 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import TableContainer from "@mui/material/TableContainer";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableCell from "@mui/material/TableCell";
+import TableBody from "@mui/material/TableBody";
 
 const LIST_PEOPLE = gql`
   query ListPeople($whereArgs: PersonWhereInput, $orderByArgs: [PersonOrderByWithRelationInput!]) {
@@ -111,6 +117,7 @@ const PersonDelete = ({
   const confirmAndDeletePerson = useConfirmAndDeletePerson();
   const onClickDelete = useCallback((ev: MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
+    ev.stopPropagation();
     confirmAndDeletePerson(person).then(onDelete);
   }, [person.id, person.firstName, person.lastName]);
 
@@ -263,6 +270,11 @@ const PersonList = ({
     setSearchParams({ ...Object.fromEntries(searchParams), orderBy: targetOrderBy, sortOrder: targetSortOrder });
   }, [changeFilter, searchParams]);
 
+  const navigate = useNavigate();
+  const onClickRow = useCallback((ev: MouseEvent) => {
+    // @ts-ignore
+    navigate(`/people/${ev.currentTarget.dataset.id}`);
+  }, []);
 
   return (
     <Page>
@@ -285,32 +297,38 @@ const PersonList = ({
           <Button onClick={onClickClearFilters} variant="contained" size="small" disabled={searchParams.size == 0}>Clear Filters</Button>
         </Stack>
       </Box>
-      <div className="table-container">
-        <div className="table-row table-header">
-          {Object.keys(rows).map(rowName => (
-            <div className="table-cell" key={rowName}>
-              {["Name", "Email", "Title"].includes(rowName) ? (
-                <a href="#" data-field={rowName.toLowerCase()} onClick={onClickHeader}>
-                  {rowName}
-                </a>
-              ) : rowName}
-              {orderBy == rowName.toLowerCase() && (sortOrder == "asc" ? (
-                <ArrowDownIcon />
-              ) : (
-                <ArrowUpIcon />
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              {Object.keys(rows).map(rowName => (
+                <TableCell key={rowName}>
+                  {["Name", "Email", "Title"].includes(rowName) ? (
+                    <a href="#" data-field={rowName.toLowerCase()} onClick={onClickHeader}>
+                      {rowName}
+                    </a>
+                  ) : rowName}
+                  {orderBy == rowName.toLowerCase() && (sortOrder == "asc" ? (
+                    <ArrowDownIcon />
+                  ) : (
+                    <ArrowUpIcon />
+                  ))}
+                </TableCell>
               ))}
-            </div>
-          ))}
-        </div>
-        {/* @ts-ignore */}
-        {(data?.listPeople || []).map((person) => (
-          <Link to={`/people/${person.id}/`} className="table-row" key={person.id}>
-            {Object.entries(rows).map(([key, rowFn]) => (
-              <div key={key} className="table-cell">{rowFn(person)}</div>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {/* @ts-ignore */}
+            {(data?.listPeople || []).map((person) => (
+              <TableRow hover key={person.id} onClick={onClickRow} data-id={person.id} style={{ cursor: "pointer" }}>
+                {Object.entries(rows).map(([key, rowFn]) => (
+                  <TableCell key={key} className="table-cell">{rowFn(person)}</TableCell>
+                ))}
+              </TableRow>
             ))}
-          </Link>
-        ))}
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Page>
   );
 };
