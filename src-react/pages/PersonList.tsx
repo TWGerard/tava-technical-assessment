@@ -239,9 +239,9 @@ const PersonList = ({
 
   const onClickClearFilters = useCallback((ev: MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
+    setSearchParams({});
     setNameFilter("");
     setEmailFilter("");
-    setSearchParams({});
   }, []);
 
   const debouncedChangeNameFilter = useDebounce((value: string) => changeFilter('name', value), 1000, [changeFilter]);
@@ -279,7 +279,7 @@ const PersonList = ({
   return (
     <Page>
       <h1>{type}</h1>
-      <Box className="table-filters">
+      <Box className="table-filters" sx={{ mb: 4 }}>
         <Stack spacing={2} direction="row">
           <TextField value={nameFilter} label="Filter by Name" onChange={onChangeNameFilter} size="small" />
           <TextField value={emailFilter} label="Filter by Email" onChange={onChangeEmailFilter} size="small" />
@@ -309,9 +309,9 @@ const PersonList = ({
                     </a>
                   ) : rowName}
                   {orderBy == rowName.toLowerCase() && (sortOrder == "asc" ? (
-                    <ArrowDownIcon />
+                    <ArrowDownIcon fontSize="small" />
                   ) : (
-                    <ArrowUpIcon />
+                    <ArrowUpIcon fontSize="small" />
                   ))}
                 </TableCell>
               ))}

@@ -44,6 +44,10 @@ header>a.current-page {
   width: 100px;
 }
 
+thead a {
+  color: black;
+}
+
 .page-wrapper {
   padding: 24px 12px 36px;
 }
