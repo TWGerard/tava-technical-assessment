@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
+import { PrismaClientKnownRequestError } from './prisma/runtime/library';
 
 @Injectable()
 export class BaseCrudService<
@@ -41,16 +42,30 @@ export class BaseCrudService<
     return this.prisma[this.getModelName()].aggregate(args);
   }
 
-  create(args: CreateArg): Promise<T> {
-    return this.prisma[this.getModelName()].create(args);
+  async create(args: CreateArg): Promise<T> {
+    try {
+      return await this.prisma[this.getModelName()].create(args);
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException(`${this.getModelName()} with that ${(error.meta.target as string[]).join(' & ')} already exists`);
+      }
+      throw error;
+    }
   }
 
   createMany(args: CreateManyArg) {
     return this.prisma[this.getModelName()].createMany(args);
   }
 
-  update(args: UpdateArg): Promise<T> {
-    return this.prisma[this.getModelName()].update(args);
+  async update(args: UpdateArg): Promise<T> {
+    try {
+      return await this.prisma[this.getModelName()].update(args);
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException(`${this.getModelName()} with that ${(error.meta.target as string[]).join(' & ')} already exists`);
+      }
+      throw error;
+    }
   }
 
   updateMany(args: UpdatedManyArg): Promise<T[]> {
