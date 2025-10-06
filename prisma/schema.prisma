@@ -13,7 +13,7 @@ generator nestgraphql {
   provider           = "node node_modules/prisma-nestjs-graphql"
   output             = "../src-nest/prismagraphql"
   reExport           = Directories
-  prismaClientImport = "src-nest/prisma/client"
+  prismaClientImport = "../../prisma/client"
 }
 
 datasource db {

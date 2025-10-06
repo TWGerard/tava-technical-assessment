@@ -17,8 +17,8 @@ import {
 import { AffectedRows } from "../prismagraphql/prisma";
 import { Resolver, Query, Args, Mutation, ResolveField, Parent } from "@nestjs/graphql";
 import { PersonService } from "./person.service";
-import { Employee } from "src-nest/prismagraphql/employee";
-import { User } from "src-nest/prismagraphql/user";
+import { Employee } from "../prismagraphql/employee";
+import { User } from "../prismagraphql/user";
 
 @Resolver(() => Person)
 export class PersonResolver {
