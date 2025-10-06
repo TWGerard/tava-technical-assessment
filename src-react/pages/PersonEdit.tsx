@@ -4,7 +4,7 @@ import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import Page from "./Page";
 import { MouseEvent, useCallback } from "react";
-import { useConfirmAndDeletePerson } from "../hooks.ts/person";
+import { useConfirmAndDeletePerson } from "../hooks/person";
 import Button from "@mui/material/Button";
 
 const GET_PERSON = gql`

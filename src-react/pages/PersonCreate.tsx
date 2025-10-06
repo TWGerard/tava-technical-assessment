@@ -4,7 +4,7 @@ import Page from "./Page";
 import { useCallback } from "react";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router";
-import { removeEmptyStrings } from "../utils.ts/string";
+import { removeEmptyStrings } from "../utils/string";
 
 
 const CREATE_PERSON = gql`

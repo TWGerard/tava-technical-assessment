@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Box from '@mui/material/Box';
-import { useListDepartments } from "../hooks.ts/department";
+import { useListDepartments } from "../hooks/department";
 import FormControl from '@mui/material/FormControl';
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
