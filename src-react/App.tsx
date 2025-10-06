@@ -13,11 +13,11 @@ function App() {
         <Header />
         <Routes>
           <Route path="/" element={<Navigate to="/employees/" replace />} />
-          <Route path="/people/" element={<PersonList />} />
+          <Route path="/people/" element={<PersonList key="people" />} />
           <Route path="/people/new/" element={<PersonCreate />} />
           <Route path="/people/:personId/" element={<PersonEdit />} />
-          <Route path="/employees/" element={<PersonList type="Employees" />} />
-          <Route path="/users/" element={<PersonList type="Users" />} />
+          <Route path="/employees/" element={<PersonList key="employees" type="Employees" />} />
+          <Route path="/users/" element={<PersonList key="users" type="Users" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

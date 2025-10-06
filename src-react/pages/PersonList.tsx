@@ -1,13 +1,9 @@
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import { ChangeEvent, MouseEvent, ReactNode, useCallback, useEffect, useState } from "react";
+import { MouseEvent, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import Page from "./Page";
-import { useConfirmAndDeletePerson } from "../hooks/person";
-import useDebounce from "../hooks/useDebounce";
 import Button from "@mui/material/Button";
-import CheckIcon from "@mui/icons-material/CheckCircleOutline";
-import RemoveIcon from "@mui/icons-material/RadioButtonUnchecked";
 import ArrowDownIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpIcon from "@mui/icons-material/ArrowUpward";
 import Box from "@mui/material/Box";
@@ -23,6 +19,9 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
+import { PersonListType } from "../components/PersonList/types";
+import PersonDeleteButton from "../components/PersonDeleteButton";
+import { usePersonList } from "../components/PersonList/hooks";
 
 const LIST_PEOPLE = gql`
   query ListPeople($whereArgs: PersonWhereInput, $orderByArgs: [PersonOrderByWithRelationInput!]) {
@@ -81,8 +80,6 @@ const LIST_USERS = gql`
   }
 `;
 
-type PersonListType = "All People" | "Employees" | "Users";
-
 const getPersonListQuery = (type: PersonListType) => {
   switch (type) {
     case "Employees":
@@ -94,7 +91,7 @@ const getPersonListQuery = (type: PersonListType) => {
   }
 }
 
-const getPersonListFilters = (type: PersonListType): any => {
+const getPersonListWhereQuery = (type: PersonListType): any => {
   switch (type) {
     case "Employees":
       return { employee: { isNot: null } };
@@ -105,43 +102,24 @@ const getPersonListFilters = (type: PersonListType): any => {
   }
 };
 
+
 const defaultOrderBy = "name";
-
-const PersonDelete = ({
-  person,
-  onDelete,
-}: {
-  person: any,
-  onDelete?: () => void,
-}) => {
-  const confirmAndDeletePerson = useConfirmAndDeletePerson();
-  const onClickDelete = useCallback((ev: MouseEvent<HTMLButtonElement>) => {
-    ev.preventDefault();
-    ev.stopPropagation();
-    confirmAndDeletePerson(person).then(onDelete);
-  }, [person.id, person.firstName, person.lastName]);
-
-  return (
-    <Button
-      data-name={`${person.firstName} ${person.lastName}`}
-      data-id={person.id}
-      onClick={onClickDelete}
-      variant="contained"
-      color="error"
-      size="small"
-    >
-      Delete
-    </Button>
-  );
-};
 
 const PersonList = ({
   type = "All People",
 }: {
   type?: PersonListType
 }) => {
+  const {
+    columns,
+    filters,
+    groupByOptions,
+    debouncedFilterValues,
+    onChangeFilter,
+    resetFilters
+  } = usePersonList(type);
   const [searchParams, setSearchParams] = useSearchParams();
-  const whereArgs = getPersonListFilters(type);
+  const whereArgs = getPersonListWhereQuery(type);
   if (searchParams.get('name')) {
     whereArgs.OR = [
       {
@@ -162,6 +140,16 @@ const PersonList = ({
     whereArgs.email = {
       contains: searchParams.get('email'),
       mode: "insensitive",
+    };
+  }
+  if (searchParams.get('title')) {
+    whereArgs.employee = {
+      is: {
+        title: {
+          contains: searchParams.get('title'),
+          mode: "insensitive",
+        }
+      }
     };
   }
   const orderByArgs: any[] = [];
@@ -188,45 +176,6 @@ const PersonList = ({
   orderByArgs.push({ lastName: sortOrder });
   const { data, refetch } = useQuery(getPersonListQuery(type), { variables: { whereArgs, orderByArgs } });
 
-  const [nameFilter, setNameFilter] = useState(searchParams.get("name") || "");
-  useEffect(() => {
-    setNameFilter(searchParams.get("name") || "");
-  }, [searchParams.get("name"), type]);
-
-  const [emailFilter, setEmailFilter] = useState(searchParams.get("email") || "");
-  useEffect(() => {
-    setEmailFilter(searchParams.get("email") || "");
-  }, [searchParams.get("email"), type]);
-
-  const rows: { [key: string]: (p: any) => ReactNode } = {
-    "Name": p => `${p.firstName} ${p.lastName}`,
-    "Email": p => p.email,
-  };
-
-  const groupByOptions: { [key: string]: string } = {};
-
-  if (type == "All People") {
-    rows["Phone"] = p => p.phone;
-  }
-
-  if (type == "Employees") {
-    rows["Department"] = p => p.employee.department?.name;
-    rows["Title"] = p => p.employee.title;
-    groupByOptions["department"] = "Department";
-  } else {
-    rows["Is Employee"] = p => p.employee ? <CheckIcon /> : <RemoveIcon />;
-  }
-
-  if (type == "Users") {
-    rows["User Type"] = p => p.user.userType;
-    groupByOptions["userType"] = "User Type";
-  } else {
-    rows["Is User"] = p => p.user ? <CheckIcon /> : <RemoveIcon />;
-  }
-
-  rows[""] = p => (
-    <PersonDelete person={p} onDelete={refetch} />
-  );
 
   const changeFilter = useCallback((key: string, value: string) => {
     if (value) {
@@ -239,22 +188,8 @@ const PersonList = ({
 
   const onClickClearFilters = useCallback((ev: MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
-    setSearchParams({});
-    setNameFilter("");
-    setEmailFilter("");
+    resetFilters();
   }, []);
-
-  const debouncedChangeNameFilter = useDebounce((value: string) => changeFilter('name', value), 1000, [changeFilter]);
-  const onChangeNameFilter = useCallback((ev: ChangeEvent<HTMLInputElement>) => {
-    setNameFilter(ev.currentTarget.value);
-    debouncedChangeNameFilter(ev.currentTarget.value);
-  }, [debouncedChangeNameFilter]);
-
-  const debouncedChangeEmailFilter = useDebounce((value: string) => changeFilter('email', value), 1000, [changeFilter]);
-  const onChangeEmailFilter = useCallback((ev: ChangeEvent<HTMLInputElement>) => {
-    setEmailFilter(ev.currentTarget.value);
-    debouncedChangeEmailFilter(ev.currentTarget.value);
-  }, [debouncedChangeEmailFilter]);
 
   const onChangeGroupBy = useCallback((ev: SelectChangeEvent) => {
     changeFilter('groupBy', ev.target.value);
@@ -281,10 +216,24 @@ const PersonList = ({
       <h1>{type}</h1>
       <Box className="table-filters" sx={{ mb: 4 }}>
         <Stack spacing={2} direction="row">
-          <TextField value={nameFilter} label="Filter by Name" onChange={onChangeNameFilter} size="small" />
-          <TextField value={emailFilter} label="Filter by Email" onChange={onChangeEmailFilter} size="small" />
+          {filters.map((filter) => (
+            <TextField
+              key={filter.key}
+              value={filter.debounced ? debouncedFilterValues[filter.key] : searchParams.get(filter.key)}
+              label={filter.label}
+              data-name={filter.key}
+              onChange={onChangeFilter}
+              slotProps={{
+                htmlInput: {
+                  "data-filter": filter.key
+                }
+              }}
+              size="small"
+            />
+          ))}
           {Object.keys(groupByOptions).length > 0 && (
             <FormControl style={{ minWidth: "120px" }}>
+              {/* TODO: Fix the label offset. Not sure why but it is off-center */}
               <InputLabel id="group-by-select">Group By</InputLabel>
               <Select labelId="group-by-select" label="Group By" value={searchParams.get("groupBy") || ""} onChange={onChangeGroupBy} size="small" autoWidth>
                 <MenuItem value="">None</MenuItem>
@@ -301,14 +250,14 @@ const PersonList = ({
         <Table size="small">
           <TableHead>
             <TableRow>
-              {Object.keys(rows).map(rowName => (
-                <TableCell key={rowName}>
-                  {["Name", "Email", "Title"].includes(rowName) ? (
-                    <a href="#" data-field={rowName.toLowerCase()} onClick={onClickHeader}>
-                      {rowName}
+              {columns.map(column => (
+                <TableCell key={column.key}>
+                  {column.sortable ? (
+                    <a href="#" data-field={column.key} onClick={onClickHeader}>
+                      {column.label}
                     </a>
-                  ) : rowName}
-                  {orderBy == rowName.toLowerCase() && (sortOrder == "asc" ? (
+                  ) : column.label}
+                  {orderBy == column.key && (sortOrder == "asc" ? (
                     <ArrowDownIcon fontSize="small" />
                   ) : (
                     <ArrowUpIcon fontSize="small" />
@@ -321,9 +270,10 @@ const PersonList = ({
             {/* @ts-ignore */}
             {(data?.listPeople || []).map((person) => (
               <TableRow hover key={person.id} onClick={onClickRow} data-id={person.id} style={{ cursor: "pointer" }}>
-                {Object.entries(rows).map(([key, rowFn]) => (
-                  <TableCell key={key} className="table-cell">{rowFn(person)}</TableCell>
+                {columns.map((column) => (
+                  <TableCell key={column.key} className="table-cell">{column.cellFn(person)}</TableCell>
                 ))}
+                <PersonDeleteButton person={person} onDelete={refetch} />
               </TableRow>
             ))}
           </TableBody>
