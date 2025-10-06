@@ -6,6 +6,8 @@ import Page from "./Page";
 import { MouseEvent, useCallback } from "react";
 import { useConfirmAndDeletePerson } from "../hooks/person";
 import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const GET_PERSON = gql`
   query GetPerson($id: Int!) {
@@ -120,9 +122,13 @@ const PersonEdit = () => {
     <Page>
       <h1>Editing {person?.firstName} {person?.lastName}</h1>
       {loading ? (
-        <>Loading</>
+        <Stack alignItems="center" justifyContent="center" sx={{ height: '200px' }}>
+          <CircularProgress />
+        </Stack>
       ) : error ? (
-        <>Error</>
+        <Stack alignItems="center" justifyContent="center" sx={{ height: '200px' }}>
+          There was an error loading this person
+        </Stack>
       ) : (
         <>
           <PersonForm

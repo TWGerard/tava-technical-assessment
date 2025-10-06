@@ -72,6 +72,7 @@ const PersonForm = ({
           <FormControlLabel
             control={<Checkbox checked={createEmployee} onChange={(ev) => setCreateEmployee(ev.target.checked)} />}
             label="Create Employee"
+            disabled={disabled}
           />
         </Box>
       )}
@@ -104,6 +105,7 @@ const PersonForm = ({
           <FormControlLabel
             control={<Checkbox checked={createUser} onChange={(ev) => setCreateUser(ev.target.checked)} />}
             label="Create User"
+            disabled={disabled}
           />
         </Box>
       )}

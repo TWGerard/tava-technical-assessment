@@ -22,6 +22,7 @@ import TableBody from "@mui/material/TableBody";
 import { PersonListType } from "../components/PersonList/types";
 import PersonDeleteButton from "../components/PersonDeleteButton";
 import { usePersonList } from "../components/PersonList/hooks";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const LIST_PEOPLE = gql`
   query ListPeople($whereArgs: PersonWhereInput, $orderByArgs: [PersonOrderByWithRelationInput!]) {
@@ -174,7 +175,7 @@ const PersonList = ({
   // Always add name sorting last
   orderByArgs.push({ firstName: sortOrder });
   orderByArgs.push({ lastName: sortOrder });
-  const { data, refetch } = useQuery(getPersonListQuery(type), { variables: { whereArgs, orderByArgs } });
+  const { data, loading, refetch } = useQuery(getPersonListQuery(type), { variables: { whereArgs, orderByArgs } });
 
 
   const changeFilter = useCallback((key: string, value: string) => {
@@ -279,6 +280,11 @@ const PersonList = ({
           </TableBody>
         </Table>
       </TableContainer>
+      {loading && (
+        <Stack alignItems="center" justifyContent="center" sx={{ height: '200px' }}>
+          <CircularProgress />
+        </Stack>
+      )}
     </Page>
   );
 };
